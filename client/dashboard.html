@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLMS — Credit Line Management System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --bg2: #111318;
+    --bg3: #181c24;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --accent: #00d4aa;
+    --accent2: #0099ff;
+    --danger: #ff4d6d;
+    --warn: #f59e0b;
+    --success: #00d4aa;
+    --font: 'Syne', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+  }
+
+  .logo {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .logo-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .logo-name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,212,170,0.06); }
+
+  .nav-icon { width: 16px; height: 16px; opacity: 0.7; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Main content */
+  .main {
+    margin-left: 220px;
+    flex: 1;
+    padding: 32px;
+    max-width: calc(100vw - 220px);
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Top bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: var(--mono);
+  }
+
+  /* Auth bar */
+  .auth-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-family: var(--mono);
+  }
+
+  .auth-status { color: var(--muted); }
+  .auth-status.connected { color: var(--accent); }
+
+  /* Cards grid */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .metric-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+
+  .metric-label {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .metric-value {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .metric-value.green { color: var(--accent); }
+  .metric-value.blue { color: var(--accent2); }
+  .metric-value.red { color: var(--danger); }
+  .metric-value.amber { color: var(--warn); }
+
+  .metric-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: var(--mono);
+  }
+
+  /* Two col layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* Panel */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  .panel-badge {
+    font-size: 10px;
+    font-family: var(--mono);
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(0,212,170,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(0,212,170,0.2);
+  }
+
+  .panel-body { padding: 18px; }
+
+  /* Form elements */
+  .form-group { margin-bottom: 14px; }
+
+  .form-label {
+    display: block;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border 0.15s;
+  }
+
+  .form-input:focus { border-color: var(--accent); }
+
+  .form-select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-danger {
+    background: rgba(255,77,109,0.15);
+    border: 1px solid rgba(255,77,109,0.3);
+    color: var(--danger);
+  }
+  .btn-danger:hover { background: rgba(255,77,109,0.25); }
+
+  .btn-full { width: 100%; justify-content: center; }
+
+  /* Transaction table */
+  .txn-table { width: 100%; border-collapse: collapse; }
+
+  .txn-table th {
+    text-align: left;
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .txn-table td {
+    padding: 11px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .txn-table tr:last-child td { border-bottom: none; }
+  .txn-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-family: var(--mono);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .badge-success { background: rgba(0,212,170,0.1); color: var(--accent); border: 1px solid rgba(0,212,170,0.2); }
+  .badge-danger  { background: rgba(255,77,109,0.1); color: var(--danger); border: 1px solid rgba(255,77,109,0.2); }
+  .badge-warn    { background: rgba(245,158,11,0.1); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+  .badge-info    { background: rgba(0,153,255,0.1); color: var(--accent2); border: 1px solid rgba(0,153,255,0.2); }
+
+  /* Response box */
+  .response-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--accent);
+    min-height: 80px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .response-box.error { color: var(--danger); }
+  .response-box.idle  { color: var(--muted); font-style: italic; }
+
+  /* NPCI simulator */
+  .scenario-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .scenario-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  .scenario-name { flex: 1; }
+
+  .scenario-result {
+    font-family: var(--mono);
+    font-size: 11px;
+    min-width: 80px;
+    text-align: right;
+  }
+
+  /* Risk engine visual */
+  .mcc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .mcc-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg3);
+    border-radius: 8px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .mcc-code { font-family: var(--mono); color: var(--muted); font-size: 11px; }
+
+  /* Loading spinner */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Ledger bars */
+  .limit-bar-wrap { margin: 12px 0; }
+  .limit-bar-track {
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .limit-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .limit-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-family: var(--mono);
+    z-index: 999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.25s;
+    max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: rgba(0,212,170,0.4); color: var(--accent); }
+  .toast.error   { border-color: rgba(255,77,109,0.4); color: var(--danger); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-tag">NPCI · RBI Compliant</div>
+    <div class="logo-name">CLMS v2.0</div>
+  </div>
+
+  <nav>
+    <div class="nav-item active" onclick="showPage('dashboard', this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+        <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+      </svg>
+      Overview
+    </div>
+    <div class="nav-item" onclick="showPage('auth', this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 016 0v2"/>
+      </svg>
+      Authentication
+    </div>
+    <div class="nav-item" onclick="showPage('users', this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+      </svg>
+      Users
+    </div>
+    <div class="nav-item" onclick="showPage('accounts', this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="1" y="4" width="14" height="10" rx="1.5"/><path d="M1 7h14M5 11h2"/>
+      </svg>
+      Credit Accounts
+    </div>
+    <div class="nav-item" onclick="showPage('transactions', this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 8h12M10 4l4 4-4 4M6 12l-4-4 4-4"/>
+      </svg>
+      Transactions
+    </div>
+    <div class="nav-item" onclick="showPage('npci', this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/>
+      </svg>
+      NPCI Simulator
+    </div>
+    <div class="nav-item" onclick="showPage('risk', this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M8 2l6 11H2z"/><path d="M8 7v3M8 11.5v.5"/>
+      </svg>
+      Risk Engine
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div style="font-size:12px; color: var(--muted);">
+      <span class="status-dot"></span>
+      <span id="server-status">Connecting...</span>
+    </div>
+    <div style="font-size:11px; color: var(--muted); margin-top:4px; font-family: var(--mono);">localhost:3000</div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- DASHBOARD PAGE -->
+  <div class="page active" id="page-dashboard">
+    <div class="topbar">
+      <div>
+        <div class="page-title">System Overview</div>
+        <div class="page-sub">Credit Line Management System · Real-time</div>
+      </div>
+      <button class="btn btn-outline" onclick="loadDashboard()">Refresh</button>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Users</div>
+        <div class="metric-value blue" id="m-users">—</div>
+        <div class="metric-sub">registered accounts</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Credit Accounts</div>
+        <div class="metric-value green" id="m-accounts">—</div>
+        <div class="metric-sub">active lines</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Transactions</div>
+        <div class="metric-value amber" id="m-txns">—</div>
+        <div class="metric-sub">total processed</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">System Status</div>
+        <div class="metric-value green" style="font-size:18px;" id="m-status">ONLINE</div>
+        <div class="metric-sub" id="m-redis">Redis · PostgreSQL</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Security Layer</span>
+          <span class="panel-badge">Active</span>
+        </div>
+        <div class="panel-body">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="scenario-item">
+              <span>JWT Authentication</span>
+              <span class="badge badge-success">ENABLED</span>
+            </div>
+            <div class="scenario-item">
+              <span>Rate Limiting</span>
+              <span class="badge badge-success">100 req/15min</span>
+            </div>
+            <div class="scenario-item">
+              <span>NPCI Signature Verify</span>
+              <span class="badge badge-success">ENABLED</span>
+            </div>
+            <div class="scenario-item">
+              <span>Helmet Headers</span>
+              <span class="badge badge-success">ENABLED</span>
+            </div>
+            <div class="scenario-item">
+              <span>AES-256 Encryption</span>
+              <span class="badge badge-info">CONFIGURED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Shadow Ledger</span>
+          <span class="panel-badge">Redis</span>
+        </div>
+        <div class="panel-body">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="scenario-item">
+              <span>Redis Status</span>
+              <span class="badge badge-success" id="redis-status">ONLINE</span>
+            </div>
+            <div class="scenario-item">
+              <span>Limit Read Latency</span>
+              <span class="badge badge-success">&lt; 5ms</span>
+            </div>
+            <div class="scenario-item">
+              <span>Dual-Write Mode</span>
+              <span class="badge badge-success">ACTIVE</span>
+            </div>
+            <div class="scenario-item">
+              <span>Cache TTL</span>
+              <span class="badge badge-info">24 hours</span>
+            </div>
+            <div class="scenario-item">
+              <span>PostgreSQL Fallback</span>
+              <span class="badge badge-success">ENABLED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Recent Transactions</span>
+        <button class="btn btn-outline" style="padding:4px 12px;font-size:12px;" onclick="loadRecentTxns()">Refresh</button>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>Merchant</th>
+              <th>MCC</th>
+              <th>Amount</th>
+              <th>Purpose</th>
+              <th>Status</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="txn-tbody">
+            <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px;font-family:var(--mono);font-size:12px;">Loading transactions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH PAGE -->
+  <div class="page" id="page-auth">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Authentication</div>
+        <div class="page-sub">JWT Token Management</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Login — Get JWT Token</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Mobile Number</label>
+            <input class="form-input" id="auth-mobile" placeholder="9876543210" type="text">
+          </div>
+          <div class="form-group">
+            <label class="form-label">UPI ID</label>
+            <input class="form-input" id="auth-upi" placeholder="shrey@upi" type="text">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="doLogin()">Login & Get Token</button>
+          <div style="margin-top:14px;">
+            <div class="form-label">JWT Token</div>
+            <div class="response-box idle" id="auth-token-box">Token will appear here after login...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Token Status</span></div>
+        <div class="panel-body">
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+            <div class="scenario-item">
+              <span style="font-size:12px;color:var(--muted);">Status</span>
+              <span class="badge" id="token-status-badge" style="background:rgba(107,114,128,0.1);color:var(--muted);border:1px solid var(--border2);">No Token</span>
+            </div>
+            <div class="scenario-item">
+              <span style="font-size:12px;color:var(--muted);">User</span>
+              <span id="token-user" style="font-family:var(--mono);font-size:12px;color:var(--muted);">—</span>
+            </div>
+            <div class="scenario-item">
+              <span style="font-size:12px;color:var(--muted);">Expires</span>
+              <span id="token-expires" style="font-family:var(--mono);font-size:12px;color:var(--muted);">—</span>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-full" onclick="verifyToken()">Verify Token</button>
+          <div style="margin-top:14px;">
+            <div class="form-label">Verify Response</div>
+            <div class="response-box idle" id="verify-box">Response will appear here...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS PAGE -->
+  <div class="page" id="page-users">
+    <div class="topbar">
+      <div>
+        <div class="page-title">User Management</div>
+        <div class="page-sub">Register & lookup UPI users</div>
+      </div>
+      <button class="btn btn-outline" onclick="loadUsers()">Load All Users</button>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Register New User</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input class="form-input" id="reg-name" placeholder="Shrey Sharma">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile Number</label>
+            <input class="form-input" id="reg-mobile" placeholder="9876543210">
+          </div>
+          <div class="form-group">
+            <label class="form-label">UPI ID</label>
+            <input class="form-input" id="reg-upi" placeholder="shrey@upi">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="registerUser()">Register User</button>
+          <div style="margin-top:14px;">
+            <div class="form-label">Response</div>
+            <div class="response-box idle" id="reg-response">Response will appear here...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Lookup by Mobile</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Mobile Number</label>
+            <input class="form-input" id="lookup-mobile" placeholder="9876543210">
+          </div>
+          <button class="btn btn-outline btn-full" onclick="lookupUser()">Lookup User</button>
+          <div style="margin-top:14px;">
+            <div class="form-label">Result</div>
+            <div class="response-box idle" id="lookup-response">Result will appear here...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">All Users</span>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>UPI ID</th>
+              <th>Credit Accounts</th>
+              <th>Registered</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:24px;font-family:var(--mono);font-size:12px;">Click "Load All Users" to fetch</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOUNTS PAGE -->
+  <div class="page" id="page-accounts">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Credit Accounts</div>
+        <div class="page-sub">Shadow Ledger · Real-time limit tracking</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Link Credit Line</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">User ID (UUID)</label>
+            <input class="form-input" id="link-userid" placeholder="paste user UUID here">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Loan Type</label>
+            <select class="form-select" id="link-loantype">
+              <option value="EDUCATION_LOAN">EDUCATION_LOAN</option>
+              <option value="CONSUMER_LOAN">CONSUMER_LOAN</option>
+              <option value="AGRI_LOAN">AGRI_LOAN</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Credit Limit (₹)</label>
+            <input class="form-input" id="link-limit" placeholder="50000" type="number">
+          </div>
+          <div class="form-group">
+            <label class="form-label">UPI PIN (6 digits)</label>
+            <input class="form-input" id="link-pin" placeholder="123456" type="password" maxlength="6">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="linkAccount()">Link Credit Line</button>
+          <div style="margin-top:14px;">
+            <div class="form-label">Response</div>
+            <div class="response-box idle" id="link-response">Response will appear here...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Check Account Balance</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Account ID (UUID)</label>
+            <input class="form-input" id="bal-accountid" placeholder="paste account UUID here">
+          </div>
+          <button class="btn btn-outline btn-full" onclick="checkBalance()">Check Balance</button>
+
+          <div id="balance-display" style="display:none;margin-top:16px;">
+            <div class="limit-bar-wrap">
+              <div style="display:flex;justify-content:space-between;font-size:12px;">
+                <span style="color:var(--muted);font-family:var(--mono);">Available Limit</span>
+                <span id="bal-source" class="badge badge-success"></span>
+              </div>
+              <div style="font-size:28px;font-weight:700;color:var(--accent);margin:8px 0;letter-spacing:-1px;" id="bal-available">₹0</div>
+              <div class="limit-bar-track">
+                <div class="limit-bar-fill" id="bal-bar" style="width:100%"></div>
+              </div>
+              <div class="limit-bar-labels">
+                <span>₹0</span>
+                <span id="bal-total">₹0 total</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <div class="scenario-item" style="flex:1;">
+                <span style="font-size:11px;color:var(--muted);">Status</span>
+                <span class="badge badge-success" id="bal-status">ACTIVE</span>
+              </div>
+              <div class="scenario-item" style="flex:1;">
+                <span style="font-size:11px;color:var(--muted);">Loan Type</span>
+                <span style="font-family:var(--mono);font-size:11px;" id="bal-loantype">—</span>
+              </div>
+            </div>
+            <div style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:8px;" id="bal-latency"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS PAGE -->
+  <div class="page" id="page-transactions">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Transactions</div>
+        <div class="page-sub">Pay · Repay · Mini Statement</div>
+      </div>
+    </div>
+
+    <div class="three-col">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Make Payment</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Account ID</label>
+            <input class="form-input" id="pay-accountid" placeholder="UUID">
+          </div>
+          <div class="form-group">
+            <label class="form-label">UPI PIN</label>
+            <input class="form-input" id="pay-pin" placeholder="123456" type="password">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (₹)</label>
+            <input class="form-input" id="pay-amount" placeholder="5000" type="number">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Merchant Name</label>
+            <input class="form-input" id="pay-merchant" placeholder="Delhi University">
+          </div>
+          <div class="form-group">
+            <label class="form-label">MCC Code</label>
+            <select class="form-select" id="pay-mcc">
+              <option value="8220">8220 — Colleges</option>
+              <option value="8211">8211 — Schools</option>
+              <option value="5732">5732 — Electronics</option>
+              <option value="5411">5411 — Grocery</option>
+              <option value="5812">5812 — Restaurant</option>
+              <option value="7995">7995 — Gambling</option>
+              <option value="6011">6011 — Cash Withdrawal</option>
+              <option value="5261">5261 — Farm Supply</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="makePay()">Send Payment</button>
+          <div style="margin-top:10px;">
+            <div class="response-box idle" id="pay-response">Response...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Repayment</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Account ID</label>
+            <input class="form-input" id="repay-accountid" placeholder="UUID">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Repayment Amount (₹)</label>
+            <input class="form-input" id="repay-amount" placeholder="5000" type="number">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="makeRepay()">Process Repayment</button>
+          <div style="margin-top:10px;">
+            <div class="response-box idle" id="repay-response">Response...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Mini Statement</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Account ID</label>
+            <input class="form-input" id="stmt-accountid" placeholder="UUID">
+          </div>
+          <button class="btn btn-outline btn-full" onclick="getStatement()">Load Statement</button>
+          <div id="stmt-list" style="margin-top:14px;display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NPCI PAGE -->
+  <div class="page" id="page-npci">
+    <div class="topbar">
+      <div>
+        <div class="page-title">NPCI Switch Simulator</div>
+        <div class="page-sub">Mock ISO 8583 transaction scenarios</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Simulate All Scenarios</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Account ID</label>
+            <input class="form-input" id="npci-accountid" placeholder="UUID">
+          </div>
+          <div class="form-group">
+            <label class="form-label">UPI PIN</label>
+            <input class="form-input" id="npci-pin" placeholder="123456" type="password">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="runNPCI()">Run Full Simulation</button>
+          <div style="margin-top:8px;">
+            <div class="scenario-item" style="font-size:11px;font-family:var(--mono);">
+              <span style="color:var(--muted);">NPCI API Key</span>
+              <span style="color:var(--accent);">npci_mock_key_abc123xyz</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Simulation Results</span>
+          <span id="npci-badge" class="panel-badge" style="display:none;">Complete</span>
+        </div>
+        <div class="panel-body">
+          <div class="scenario-list" id="npci-results">
+            <div style="color:var(--muted);font-family:var(--mono);font-size:12px;text-align:center;padding:24px;">
+              Run a simulation to see results
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RISK ENGINE PAGE -->
+  <div class="page" id="page-risk">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Risk Engine</div>
+        <div class="page-sub">MCC filtering · Purpose-bound rules · RBI compliant</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Evaluate Transaction Risk</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label">Account ID</label>
+            <input class="form-input" id="risk-accountid" placeholder="UUID">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Loan Type</label>
+            <select class="form-select" id="risk-loantype">
+              <option value="EDUCATION_LOAN">EDUCATION_LOAN</option>
+              <option value="CONSUMER_LOAN">CONSUMER_LOAN</option>
+              <option value="AGRI_LOAN">AGRI_LOAN</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">MCC Code</label>
+            <select class="form-select" id="risk-mcc">
+              <option value="8220">8220 — Colleges</option>
+              <option value="8211">8211 — Schools</option>
+              <option value="5732">5732 — Electronics</option>
+              <option value="5411">5411 — Grocery</option>
+              <option value="5812">5812 — Restaurant</option>
+              <option value="7995">7995 — Gambling</option>
+              <option value="6011">6011 — Cash Withdrawal</option>
+              <option value="5261">5261 — Farm Supply</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (₹)</label>
+            <input class="form-input" id="risk-amount" placeholder="5000" type="number">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="evaluateRisk()">Evaluate Risk</button>
+
+          <div id="risk-result-box" style="margin-top:14px;display:none;">
+            <div style="text-align:center;padding:16px;border-radius:10px;" id="risk-verdict">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">MCC Rules Table</span>
+          <button class="btn btn-outline" style="padding:4px 12px;font-size:12px;" onclick="loadMCCRules()">Load</button>
+        </div>
+        <div class="panel-body">
+          <div class="mcc-grid" id="mcc-rules-grid">
+            <div style="color:var(--muted);font-family:var(--mono);font-size:12px;grid-column:span 2;text-align:center;padding:16px;">
+              Click Load to view MCC rules
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://localhost:3000/';
+let JWT_TOKEN = '';
+
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+function setResponse(id, data, isError = false) {
+  const el = document.getElementById(id);
+  el.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+  el.className = 'response-box ' + (isError ? 'error' : '');
+}
+
+async function apiCall(method, path, body = null, useNPCI = false) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (JWT_TOKEN) headers['Authorization'] = 'Bearer ' + JWT_TOKEN;
+  if (useNPCI) {
+    headers['x-npci-api-key'] = 'npci_mock_key_abc123xyz';
+    headers['x-timestamp'] = Date.now().toString();
+  }
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  return r.json();
+}
+
+async function checkServer() {
+  try {
+    const d = await fetch(API + '/').then(r => r.json());
+    document.getElementById('server-status').textContent = 'Connected';
+    document.getElementById('server-status').style.color = 'var(--accent)';
+    loadDashboard();
+  } catch {
+    document.getElementById('server-status').textContent = 'Offline';
+    document.getElementById('server-status').style.color = 'var(--danger)';
+  }
+}
+
+async function loadDashboard() {
+  try {
+    const d = await fetch(API + '/').then(r => r.json());
+    document.getElementById('m-status').textContent = 'ONLINE';
+    if (JWT_TOKEN) {
+      const users = await apiCall('GET', '/api/user/all');
+      if (users.success) {
+        document.getElementById('m-users').textContent = users.data.length;
+        const totalAcc = users.data.reduce((s, u) => s + parseInt(u.credit_accounts || 0), 0);
+        document.getElementById('m-accounts').textContent = totalAcc;
+      }
+    } else {
+      document.getElementById('m-users').textContent = 'Login';
+      document.getElementById('m-accounts').textContent = 'Login';
+    }
+    loadRecentTxns();
+  } catch(e) {}
+}
+
+async function loadRecentTxns() {
+  const tbody = document.getElementById('txn-tbody');
+  if (!JWT_TOKEN) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px;font-family:var(--mono);font-size:12px;">Login to view transactions</td></tr>';
+    return;
+  }
+  tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:16px;font-family:var(--mono);font-size:12px;"><span class="spinner"></span></td></tr>';
+  try {
+    const users = await apiCall('GET', '/api/user/all');
+    if (!users.success) return;
+    let allTxns = [];
+    for (const u of users.data) {
+      const lookup = await apiCall('GET', '/api/user/mobile/' + u.mobile);
+      if (lookup.success) {
+        for (const row of lookup.data) {
+          if (row.account_id) {
+            const stmt = await apiCall('GET', '/api/transaction/' + row.account_id + '/statement');
+            if (stmt.success) allTxns = allTxns.concat(stmt.data.map(t => ({...t, user: u.name})));
+          }
+        }
+      }
+    }
+    allTxns.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    document.getElementById('m-txns').textContent = allTxns.length;
+    if (allTxns.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px;font-family:var(--mono);font-size:12px;">No transactions yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = allTxns.slice(0, 10).map(t => `
+      <tr>
+        <td style="font-weight:500;">${t.merchant_name}</td>
+        <td><span class="badge badge-info">${t.mcc}</span></td>
+        <td style="font-family:var(--mono);">₹${parseFloat(t.amount).toLocaleString('en-IN')}</td>
+        <td><span style="font-family:var(--mono);font-size:11px;color:var(--muted);">${t.purpose_code || '—'}</span></td>
+        <td><span class="badge ${t.status === 'SUCCESS' ? 'badge-success' : t.status === 'REJECTED' ? 'badge-danger' : 'badge-warn'}">${t.status}</span></td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--muted);">${new Date(t.created_at).toLocaleTimeString()}</td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--danger);text-align:center;padding:24px;font-size:12px;">Error loading</td></tr>';
+  }
+}
+
+async function doLogin() {
+  const mobile = document.getElementById('auth-mobile').value.trim();
+  const upi_id = document.getElementById('auth-upi').value.trim();
+  if (!mobile || !upi_id) return showToast('Enter mobile and UPI ID', 'error');
+  try {
+    const d = await apiCall('POST', '/api/auth/login', { mobile, upi_id });
+    if (d.success) {
+      JWT_TOKEN = d.token;
+      document.getElementById('auth-token-box').textContent = d.token;
+      document.getElementById('auth-token-box').className = 'response-box';
+      document.getElementById('token-status-badge').textContent = 'Valid';
+      document.getElementById('token-status-badge').className = 'badge badge-success';
+      document.getElementById('token-user').textContent = d.user.name;
+      document.getElementById('token-expires').textContent = '24h from now';
+      showToast('Logged in as ' + d.user.name);
+      loadDashboard();
+    } else {
+      setResponse('auth-token-box', d, true);
+      showToast('Login failed', 'error');
+    }
+  } catch(e) { setResponse('auth-token-box', e.message, true); }
+}
+
+async function verifyToken() {
+  if (!JWT_TOKEN) return showToast('No token. Login first.', 'error');
+  try {
+    const d = await apiCall('GET', '/api/auth/verify');
+    setResponse('verify-box', d);
+    showToast(d.success ? 'Token valid' : 'Token invalid', d.success ? 'success' : 'error');
+  } catch(e) { setResponse('verify-box', e.message, true); }
+}
+
+async function registerUser() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const name = document.getElementById('reg-name').value.trim();
+  const mobile = document.getElementById('reg-mobile').value.trim();
+  const upi_id = document.getElementById('reg-upi').value.trim();
+  if (!name || !mobile || !upi_id) return showToast('All fields required', 'error');
+  try {
+    const d = await apiCall('POST', '/api/user/register', { name, mobile, upi_id });
+    setResponse('reg-response', d, !d.success);
+    showToast(d.success ? 'User registered! Copy the ID' : d.message, d.success ? 'success' : 'error');
+  } catch(e) { setResponse('reg-response', e.message, true); }
+}
+
+async function lookupUser() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const mobile = document.getElementById('lookup-mobile').value.trim();
+  if (!mobile) return showToast('Enter mobile number', 'error');
+  try {
+    const d = await apiCall('GET', '/api/user/mobile/' + mobile);
+    setResponse('lookup-response', d, !d.success);
+  } catch(e) { setResponse('lookup-response', e.message, true); }
+}
+
+async function loadUsers() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:16px;"><span class="spinner"></span></td></tr>';
+  try {
+    const d = await apiCall('GET', '/api/user/all');
+    if (!d.success) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--danger);text-align:center;padding:16px;font-size:12px;">Error loading</td></tr>'; return; }
+    tbody.innerHTML = d.data.map(u => `
+      <tr>
+        <td style="font-weight:500;">${u.name}</td>
+        <td style="font-family:var(--mono);font-size:12px;">${u.mobile}</td>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--accent);">${u.upi_id}</td>
+        <td><span class="badge badge-info">${u.credit_accounts}</span></td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--muted);">${new Date(u.created_at).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+  } catch(e) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--danger);text-align:center;padding:16px;">Error</td></tr>'; }
+}
+
+async function linkAccount() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const user_id = document.getElementById('link-userid').value.trim();
+  const loan_type = document.getElementById('link-loantype').value;
+  const total_limit = document.getElementById('link-limit').value;
+  const upi_pin = document.getElementById('link-pin').value.trim();
+  if (!user_id || !total_limit || !upi_pin) return showToast('All fields required', 'error');
+  try {
+    const d = await apiCall('POST', '/api/account/link', { user_id, loan_type, total_limit: parseFloat(total_limit), upi_pin });
+    setResponse('link-response', d, !d.success);
+    showToast(d.success ? 'Credit line linked! Copy account ID' : d.message, d.success ? 'success' : 'error');
+  } catch(e) { setResponse('link-response', e.message, true); }
+}
+
+async function checkBalance() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const id = document.getElementById('bal-accountid').value.trim();
+  if (!id) return showToast('Enter account ID', 'error');
+  try {
+    const d = await apiCall('GET', '/api/account/' + id);
+    if (d.success) {
+      const data = d.data;
+      const avail = parseFloat(data.available_limit);
+      const total = parseFloat(data.total_limit);
+      const pct = Math.round((avail / total) * 100);
+      document.getElementById('bal-available').textContent = '₹' + avail.toLocaleString('en-IN');
+      document.getElementById('bal-total').textContent = '₹' + total.toLocaleString('en-IN') + ' total';
+      document.getElementById('bal-bar').style.width = pct + '%';
+      document.getElementById('bal-bar').style.background = pct > 50 ? 'var(--accent)' : pct > 20 ? 'var(--warn)' : 'var(--danger)';
+      document.getElementById('bal-status').textContent = data.status;
+      document.getElementById('bal-loantype').textContent = data.loan_type;
+      document.getElementById('bal-source').textContent = d.source || 'DB';
+      document.getElementById('bal-latency').textContent = 'Read latency: ' + (d.latency_ms || '—') + 'ms · ' + (d.source || '');
+      document.getElementById('balance-display').style.display = 'block';
+      showToast('Balance loaded from ' + (d.source || 'DB'));
+    } else {
+      showToast(d.message, 'error');
+    }
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function makePay() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const account_id = document.getElementById('pay-accountid').value.trim();
+  const upi_pin = document.getElementById('pay-pin').value.trim();
+  const amount = document.getElementById('pay-amount').value;
+  const merchant_name = document.getElementById('pay-merchant').value.trim();
+  const mcc = document.getElementById('pay-mcc').value;
+  if (!account_id || !upi_pin || !amount || !merchant_name) return showToast('All fields required', 'error');
+  try {
+    const d = await apiCall('POST', '/api/transaction/pay', { account_id, upi_pin, amount: parseFloat(amount), merchant_name, mcc });
+    setResponse('pay-response', d, !d.success);
+    showToast(d.decision === 'APPROVED' ? 'Payment approved!' : 'Payment rejected: ' + (d.reasons?.[0] || d.message), d.decision === 'APPROVED' ? 'success' : 'error');
+  } catch(e) { setResponse('pay-response', e.message, true); }
+}
+
+async function makeRepay() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const account_id = document.getElementById('repay-accountid').value.trim();
+  const amount = document.getElementById('repay-amount').value;
+  if (!account_id || !amount) return showToast('All fields required', 'error');
+  try {
+    const d = await apiCall('POST', '/api/transaction/repay', { account_id, amount: parseFloat(amount) });
+    setResponse('repay-response', d, !d.success);
+    showToast(d.success ? 'Repayment processed!' : d.message, d.success ? 'success' : 'error');
+  } catch(e) { setResponse('repay-response', e.message, true); }
+}
+
+async function getStatement() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const id = document.getElementById('stmt-accountid').value.trim();
+  if (!id) return showToast('Enter account ID', 'error');
+  const list = document.getElementById('stmt-list');
+  list.innerHTML = '<div style="color:var(--muted);font-family:var(--mono);font-size:12px;"><span class="spinner"></span> Loading...</div>';
+  try {
+    const d = await apiCall('GET', '/api/transaction/' + id + '/statement');
+    if (!d.success) { list.innerHTML = '<div style="color:var(--danger);font-size:12px;">' + d.message + '</div>'; return; }
+    if (d.data.length === 0) { list.innerHTML = '<div style="color:var(--muted);font-family:var(--mono);font-size:12px;">No transactions</div>'; return; }
+    list.innerHTML = d.data.map(t => `
+      <div class="scenario-item">
+        <div>
+          <div style="font-size:13px;font-weight:500;">${t.merchant_name}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono);">MCC ${t.mcc} · ${new Date(t.created_at).toLocaleString()}</div>
+          ${t.rejection_reason ? '<div style="font-size:11px;color:var(--danger);">' + t.rejection_reason + '</div>' : ''}
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:var(--mono);font-size:13px;">₹${parseFloat(t.amount).toLocaleString('en-IN')}</div>
+          <span class="badge ${t.status === 'SUCCESS' ? 'badge-success' : 'badge-danger'}">${t.status}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { list.innerHTML = '<div style="color:var(--danger);font-size:12px;">' + e.message + '</div>'; }
+}
+
+async function runNPCI() {
+  const account_id = document.getElementById('npci-accountid').value.trim();
+  const upi_pin = document.getElementById('npci-pin').value.trim();
+  if (!account_id || !upi_pin) return showToast('Account ID and PIN required', 'error');
+  const results = document.getElementById('npci-results');
+  results.innerHTML = '<div style="color:var(--muted);font-family:var(--mono);font-size:12px;text-align:center;padding:16px;"><span class="spinner"></span> Simulating NPCI requests...</div>';
+  try {
+    const d = await apiCall('POST', '/api/mock-npci/simulate-all', { account_id, upi_pin }, true);
+    if (!d.success) { results.innerHTML = '<div style="color:var(--danger);font-size:12px;">' + d.message + '</div>'; return; }
+    document.getElementById('npci-badge').style.display = 'inline';
+    results.innerHTML = d.results.map(r => `
+      <div class="scenario-item">
+        <div style="flex:1;">
+          <div style="font-size:13px;">${r.scenario_name}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:3px;">${r.message || ''}</div>
+        </div>
+        <span class="badge ${r.decision === 'APPROVED' ? 'badge-success' : r.decision === 'REJECTED' ? 'badge-danger' : 'badge-warn'}">${r.decision}</span>
+      </div>
+    `).join('');
+    showToast('NPCI simulation complete');
+  } catch(e) { results.innerHTML = '<div style="color:var(--danger);font-size:12px;">' + e.message + '</div>'; }
+}
+
+async function evaluateRisk() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const account_id = document.getElementById('risk-accountid').value.trim();
+  const loan_type = document.getElementById('risk-loantype').value;
+  const mcc = document.getElementById('risk-mcc').value;
+  const amount = document.getElementById('risk-amount').value;
+  if (!account_id || !amount) return showToast('Account ID and amount required', 'error');
+  try {
+    const d = await apiCall('POST', '/api/risk/evaluate', { account_id, loan_type, mcc, amount: parseFloat(amount) });
+    const box = document.getElementById('risk-result-box');
+    const verdict = document.getElementById('risk-verdict');
+    box.style.display = 'block';
+    if (d.decision === 'APPROVED') {
+      verdict.style.background = 'rgba(0,212,170,0.08)';
+      verdict.style.border = '1px solid rgba(0,212,170,0.2)';
+      verdict.innerHTML = '<div style="font-size:20px;font-weight:700;color:var(--accent);margin-bottom:6px;">APPROVED</div><div style="font-size:12px;font-family:var(--mono);color:var(--muted);">MCC ' + mcc + ' permitted for ' + loan_type + '</div>';
+    } else {
+      verdict.style.background = 'rgba(255,77,109,0.08)';
+      verdict.style.border = '1px solid rgba(255,77,109,0.2)';
+      verdict.innerHTML = '<div style="font-size:20px;font-weight:700;color:var(--danger);margin-bottom:6px;">REJECTED</div>' + (d.reasons || []).map(r => '<div style="font-size:12px;font-family:var(--mono);color:var(--muted);margin-top:4px;">' + r + '</div>').join('');
+    }
+    showToast('Risk evaluated: ' + d.decision, d.decision === 'APPROVED' ? 'success' : 'error');
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function loadMCCRules() {
+  if (!JWT_TOKEN) return showToast('Login first', 'error');
+  const grid = document.getElementById('mcc-rules-grid');
+  grid.innerHTML = '<div style="color:var(--muted);font-size:12px;grid-column:span 2;text-align:center;"><span class="spinner"></span></div>';
+  try {
+    const d = await apiCall('GET', '/api/risk/mcc-rules');
+    if (!d.success) return;
+    grid.innerHTML = d.data.map(r => `
+      <div class="mcc-item">
+        <div>
+          <div class="mcc-code">${r.mcc}</div>
+          <div style="font-size:12px;margin-top:2px;">${r.description}</div>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px;">${r.loan_type}</div>
+        </div>
+        <span class="badge ${r.is_allowed ? 'badge-success' : 'badge-danger'}">${r.is_allowed ? 'ALLOW' : 'BLOCK'}</span>
+      </div>
+    `).join('');
+  } catch(e) { grid.innerHTML = '<div style="color:var(--danger);font-size:12px;grid-column:span 2;">' + e.message + '</div>'; }
+}
+
+checkServer();
+</script>
+</body>
+</html>

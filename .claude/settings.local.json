@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb reverse *)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(curl -s http://localhost:8081/status)",
+      "Read(//media/phckoff/ac5ce300-9916-4470-b1d3-8310bb7bd1cc/home/phckoff/CLMSApp/**)",
+      "Bash(npx react-native *)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{\"mobile\":\"9876543210\",\"upi_pin\":\"123456\"}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{\"mobile\":\"9876543210\",\"upi_id\":\"shrey@upi\"}')",
+      "Bash(curl -s http://localhost:3000/api/account/1e3c4e24-786f-4848-aaad-b7e9f5a7cd22 -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZTA4ODRkY2QtMDk1ZS00ODhkLWJlOTItYWE4Y2RkN2VlYjY5IiwibW9iaWxlIjoiOTg3NjU0MzIxMCIsInVwaV9pZCI6InNocmV5QHVwaSIsIm5hbWUiOiJTaHJleSBTaGFybWEiLCJpYXQiOjE3NzY4NjI3MDksImV4cCI6MTc3Njk0OTEwOX0.BreF5MmRp30mPwB_lzz4w_cN8AX8S45urKP-DNMLLfQ')",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('UP' if d.get\\('status'\\) else 'DOWN'\\)\")",
+      "Bash(npm install *)",
+      "Bash(npm uninstall *)",
+      "Bash(psql -U postgres -d clms_db -c \"SELECT loan_type, mcc, is_allowed, description FROM mcc_rules ORDER BY loan_type, is_allowed DESC;\")",
+      "Bash(PGPASSWORD=postgres psql -U postgres -d clms_db -c \"SELECT loan_type, mcc, is_allowed, description FROM mcc_rules ORDER BY loan_type, is_allowed DESC;\")",
+      "Bash(psql -U postgres -h localhost -d clms_db -c \"\\\\dt\")",
+      "Bash(redis-cli ping *)",
+      "Bash(PGPASSWORD='@sharma2619' psql -U postgres -h localhost -d clms_db -c \"\\\\dt\")"
+    ]
+  }
+}
