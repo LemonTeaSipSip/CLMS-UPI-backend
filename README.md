@@ -467,7 +467,7 @@ navigation.replace('Dashboard', {token: data.token, user});
 
 ---
 
-![alt text](Screenshot_20260423_151553_CLMS-1.jpg)
+![alt text](media/Screenshot_20260423_151553_CLMS-1.jpg)
 
 ---
 
@@ -486,7 +486,7 @@ body: JSON.stringify({
 
 ---
 
-![alt text](Screenshot_20260423_151605_CLMS-1.jpg)
+![alt text](media/Screenshot_20260423_151605_CLMS-1.jpg)
 
 ---
 
@@ -503,7 +503,7 @@ Action tiles navigate to: Pay, Repayment, Statement, Generate QR.
 
 ---
 
-![alt text](Screenshot_20260423_151618_CLMS-1.jpg)
+![alt text](media/Screenshot_20260423_151618_CLMS-1.jpg)
 
 ---
 
@@ -525,9 +525,9 @@ const handlePay = async () => {
 
 ---
 
-![alt text](Screenshot_20260423_151651_CLMS-1.jpg)
+![alt text](media/Screenshot_20260423_151651_CLMS-1.jpg)
 
-![alt text](Screenshot_20260423_151655_CLMS-1.jpg)
+![alt text](media/Screenshot_20260423_151655_CLMS-1.jpg)
 
 ---
 
@@ -553,7 +553,7 @@ navigation.goBack(); // Returns to PayScreen, which reads via useFocusEffect
 
 ---
 
-![alt text](Screenshot_20260423_151751_CLMS-1.jpg)
+![alt text](media/Screenshot_20260423_151751_CLMS-1.jpg)
 
 ---
 
@@ -570,7 +570,7 @@ Displays the QR image, order ID, merchant name, amount, and status.
 
 ---
 
-![alt text](Screenshot_20260423_151855_CLMS-1.jpg)
+![alt text](media/Screenshot_20260423_151855_CLMS-1.jpg)
 
 ---
 
@@ -585,9 +585,9 @@ const outstanding = (total - available).toFixed(2);
 
 ---
 
-![alt text](Screenshot_20260423_151924_CLMS-2.jpg)
+![alt text](media/Screenshot_20260423_151924_CLMS-2.jpg)
 
-![alt text](Screenshot_20260423_151928_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151928_CLMS.jpg)
 
 ---
 
@@ -607,7 +607,7 @@ const fetchStatement = async () => {
 
 ---
 
-![alt text](Screenshot_20260423_151939_CLMS-1.jpg)
+![alt text](media/Screenshot_20260423_151939_CLMS-1.jpg)
 
 ---
 
@@ -776,31 +776,31 @@ ADMIN_SECRET=admin_secret
 ## Screenshots
 
 
-![alt text](Screenshot_20260423_151553_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151553_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151605_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151605_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151618_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151618_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151651_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151651_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151655_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151655_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151705_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151705_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151751_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151751_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151812_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151812_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151855_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151855_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151924_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151924_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151924_CLMS-1.jpg)
+![alt text](media/Screenshot_20260423_151924_CLMS-1.jpg)
 
-![alt text](Screenshot_20260423_151934_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151934_CLMS.jpg)
 
-![alt text](Screenshot_20260423_151939_CLMS.jpg)
+![alt text](media/Screenshot_20260423_151939_CLMS.jpg)
 
-![alt text](Screenshot_20260423_152039_CLMS.jpg)
+![alt text](media/Screenshot_20260423_152039_CLMS.jpg)
 
